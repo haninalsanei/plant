@@ -36,7 +36,6 @@ struct PlantsHeader: View {
     }
 }
 
-// زر + العائم
 struct AddFloatingButton: View {
     var action: () -> Void
 
@@ -46,8 +45,10 @@ struct AddFloatingButton: View {
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(.white)
                 .frame(width: 48, height: 48)
-                .background(Color.plantGreen, in: Circle())
-                .overlay(Circle().stroke(Color.plantGreenBorder.opacity(0.6), lineWidth: 1))
         }
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.circle)
+        .tint(Color.plantGreen)
     }
 }
+

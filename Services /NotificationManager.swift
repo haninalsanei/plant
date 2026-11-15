@@ -5,8 +5,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     private let center = UNUserNotificationCenter.current()
     private let reminderHour = 9
-    private let batchCount = 10
-    
+    private let batchCount = 4
+
     private override init() {
         super.init()
         center.delegate = self
@@ -31,12 +31,14 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             await removePending(for: plant)
 
             let cal = Calendar.current
+            let body = "Time to water \(plant.name) 💧"
 
             switch plant.wateringFrequency {
             case .everyDay:
                 var comps = DateComponents()
                 comps.hour = reminderHour
                 await add(id: "\(plant.id.uuidString)-0",
+                          body: body,
                           trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true))
 
             case .weekly:
@@ -44,6 +46,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 comps.weekday = cal.component(.weekday, from: Date())
                 comps.hour = reminderHour
                 await add(id: "\(plant.id.uuidString)-0",
+                          body: body,
                           trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true))
 
             default:
@@ -60,6 +63,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                                               to: start) else { continue }
                     let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: date)
                     await add(id: "\(plant.id.uuidString)-\(i)",
+                              body: body,
                               trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
                 }
             }
@@ -75,10 +79,10 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // MARK: - Helpers
-    private func add(id: String, trigger: UNNotificationTrigger) async {
+    private func add(id: String, body: String, trigger: UNNotificationTrigger) async {
         let content = UNMutableNotificationContent()
         content.title = "Planto"
-        content.body = "Hey! let's water your plant"
+        content.body = body
         content.sound = .default
 
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
@@ -92,11 +96,14 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // MARK: - للتجربة فقط
+    #if DEBUG
     func sendTest() {
         Task {
             guard await requestPermission() else { return }
             await add(id: "test",
+                      body: "Test notification",
                       trigger: UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false))
         }
     }
+    #endif
 }

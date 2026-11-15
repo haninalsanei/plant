@@ -75,8 +75,7 @@ struct TodayRemindersView: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(Color.white.opacity(0.2))
                     Capsule()
-                        .fill(Color(red: 0.38, green: 0.73, blue: 0.62))
-                        .frame(width: geo.size.width * viewModel.progress)
+                        .fill(Color.progressGreen)                        .frame(width: geo.size.width * viewModel.progress)
                 }
             }
             .frame(height: 4)
