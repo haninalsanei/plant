@@ -97,3 +97,23 @@ struct Plant: Identifiable, Codable {
     var waterAmount: WaterAmount = .ml20to50
     var lastWateredDate: Date? = nil
 }
+
+// MARK: - Today logic
+extension Plant {
+    var isDoneToday: Bool {
+        guard let last = lastWateredDate else { return false }
+        return Calendar.current.isDateInToday(last)
+    }
+
+    /// هل موعد سقيها اليوم (أو فات)؟
+    var isDueToday: Bool {
+        guard let last = lastWateredDate else { return true }
+        let cal = Calendar.current
+        let days = cal.dateComponents(
+            [.day],
+            from: cal.startOfDay(for: last),
+            to: cal.startOfDay(for: Date())
+        ).day ?? 0
+        return days >= wateringFrequency.days
+    }
+}

@@ -3,13 +3,30 @@ import SwiftUI
 struct SetReminderView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name = ""
-    @State private var room: Room = .bedroom
-    @State private var light: LightRequirement = .fullSun
-    @State private var frequency: WateringFrequency = .everyDay
-    @State private var amount: WaterAmount = .ml20to50
+    private let existing: Plant?
+    private let onSave: (Plant) -> Void
+    private let onDelete: (() -> Void)?
 
-    var onSave: (Plant) -> Void = { _ in }
+    @State private var name: String
+    @State private var room: Room
+    @State private var light: LightRequirement
+    @State private var frequency: WateringFrequency
+    @State private var amount: WaterAmount
+
+    init(
+        plant: Plant? = nil,
+        onSave: @escaping (Plant) -> Void = { _ in },
+        onDelete: (() -> Void)? = nil
+    ) {
+        self.existing = plant
+        self.onSave = onSave
+        self.onDelete = onDelete
+        _name = State(initialValue: plant?.name ?? "")
+        _room = State(initialValue: plant?.room ?? .bedroom)
+        _light = State(initialValue: plant?.light ?? .fullSun)
+        _frequency = State(initialValue: plant?.wateringFrequency ?? .everyDay)
+        _amount = State(initialValue: plant?.waterAmount ?? .ml20to50)
+    }
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
@@ -30,6 +47,20 @@ struct SetReminderView: View {
                 pickerRow("Watering Days", icon: "drop", selection: $frequency) { $0.displayName }
                 Divider().overlay(Color.white.opacity(0.1))
                 pickerRow("Water", icon: "drop", selection: $amount) { $0.displayName }
+            }
+
+            if onDelete != nil {
+                Button {
+                    onDelete?()
+                    dismiss()
+                } label: {
+                    Text("Delete Reminder")
+                        .font(.subheadline)
+                        .foregroundStyle(Color(red: 0.93, green: 0.33, blue: 0.31))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 46)
+                        .background(Color(white: 0.18), in: Capsule())
+                }
             }
 
             Spacer()
@@ -125,18 +156,17 @@ struct SetReminderView: View {
 
     // MARK: - Save
     private func save() {
-        let plant = Plant(
-            name: name.trimmingCharacters(in: .whitespaces),
-            room: room,
-            light: light,
-            wateringFrequency: frequency,
-            waterAmount: amount
-        )
+        var plant = existing ?? Plant(name: "")
+        plant.name = name.trimmingCharacters(in: .whitespaces)
+        plant.room = room
+        plant.light = light
+        plant.wateringFrequency = frequency
+        plant.waterAmount = amount
         onSave(plant)
         dismiss()
     }
 }
 
 #Preview {
-    SetReminderView()
+    SetReminderView(plant: Plant(name: "Pothos"), onDelete: {})
 }
