@@ -5,7 +5,7 @@ struct NoRemindersView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+    //        Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 PlantsHeader()

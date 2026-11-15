@@ -8,6 +8,8 @@ struct ContentView: View {
         Group {
             if viewModel.plants.isEmpty {
                 EmptyStateView { showAddSheet = true }
+            } else if viewModel.todayPlants.isEmpty {
+                NoRemindersView { showAddSheet = true }
             } else if viewModel.allDone {
                 AllDoneView { showAddSheet = true }
             } else {
@@ -24,4 +26,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .preferredColorScheme(.dark)
 }

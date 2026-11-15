@@ -1,8 +1,8 @@
 import SwiftUI
 
-private let mint = Color(red: 0.16, green: 0.87, blue: 0.66)        // 29DFA8
-private let tagYellow = Color(red: 0.81, green: 0.87, blue: 0.54)   // CEDE89
-private let deleteRed = Color(red: 0.93, green: 0.33, blue: 0.31)
+private let mint = Color.plantMint
+private let tagYellow = Color.tagYellow
+private let deleteRed = Color.deleteRed
 
 struct TodayRemindersView: View {
     var viewModel: PlantViewModel

@@ -25,7 +25,7 @@ final class PlantViewModel {
     }
 
     var allDone: Bool {
-        todayPlants.allSatisfy { $0.isDoneToday }
+        !todayPlants.isEmpty && todayPlants.allSatisfy { $0.isDoneToday }
     }
 
     // MARK: - Actions

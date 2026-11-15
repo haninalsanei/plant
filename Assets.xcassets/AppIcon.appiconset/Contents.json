@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Pasted Graphic.png",
+      "filename" : "Planto-iOS-Dark-1024@1x.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Pasted Graphic 1.png",
+      "filename" : "Planto-iOS-Default-1024@1x.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,6 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "Pasted Graphic 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

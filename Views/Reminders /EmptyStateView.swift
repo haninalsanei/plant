@@ -5,7 +5,7 @@ struct EmptyStateView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+//            Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 PlantsHeader()
@@ -25,7 +25,7 @@ struct EmptyStateView: View {
                     Text("Now all your plants will be in one place and\nwe will help you take care of them :)🪴")
                         .font(.footnote)
                         .multilineTextAlignment(.center)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(Color.subtitleGray)
 
                     Button(action: onAddTapped) {
                         Text("Set Plant Reminder")

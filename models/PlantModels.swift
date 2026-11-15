@@ -2,7 +2,11 @@ import Foundation
 
 // MARK: - Room
 enum Room: String, CaseIterable, Identifiable, Codable {
-    case bedroom, livingRoom, kitchen, balcony, bathroom
+    case bedroom = "bedroom"
+    case livingRoom = "livingRoom"
+    case kitchen = "kitchen"
+    case balcony = "balcony"
+    case bathroom = "bathroom"
 
     var id: String { rawValue }
 
@@ -29,7 +33,9 @@ enum Room: String, CaseIterable, Identifiable, Codable {
 
 // MARK: - Light
 enum LightRequirement: String, CaseIterable, Identifiable, Codable {
-    case fullSun, partialSun, lowLight
+    case fullSun = "fullSun"
+    case partialSun = "partialSun"
+    case lowLight = "lowLight"
 
     var id: String { rawValue }
 
@@ -44,7 +50,12 @@ enum LightRequirement: String, CaseIterable, Identifiable, Codable {
 
 // MARK: - Watering Frequency
 enum WateringFrequency: String, CaseIterable, Identifiable, Codable {
-    case everyDay, every2Days, every3Days, weekly, every10Days, every2Weeks
+    case everyDay = "everyDay"
+    case every2Days = "every2Days"
+    case every3Days = "every3Days"
+    case weekly = "weekly"
+    case every10Days = "every10Days"
+    case every2Weeks = "every2Weeks"
 
     var id: String { rawValue }
 
@@ -73,7 +84,10 @@ enum WateringFrequency: String, CaseIterable, Identifiable, Codable {
 
 // MARK: - Water Amount
 enum WaterAmount: String, CaseIterable, Identifiable, Codable {
-    case ml20to50, ml50to100, ml100to200, ml200to300
+    case ml20to50 = "ml20to50"
+    case ml50to100 = "ml50to100"
+    case ml100to200 = "ml100to200"
+    case ml200to300 = "ml200to300"
 
     var id: String { rawValue }
 
@@ -95,7 +109,7 @@ struct Plant: Identifiable, Codable {
     var light: LightRequirement = .fullSun
     var wateringFrequency: WateringFrequency = .everyDay
     var waterAmount: WaterAmount = .ml20to50
-    var lastWateredDate: Date? = nil
+    var lastWateredDate: Date?
 }
 
 // MARK: - Today logic

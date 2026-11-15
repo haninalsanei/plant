@@ -56,10 +56,10 @@ struct SetReminderView: View {
                 } label: {
                     Text("Delete Reminder")
                         .font(.subheadline)
-                        .foregroundStyle(Color(red: 0.93, green: 0.33, blue: 0.31))
+                        .foregroundStyle(Color.deleteRed)
                         .frame(maxWidth: .infinity)
                         .frame(height: 46)
-                        .background(Color(white: 0.18), in: Capsule())
+                        .glassEffect(.regular.interactive(), in: .capsule)
                 }
             }
 
@@ -67,9 +67,9 @@ struct SetReminderView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
-        .background(Color(white: 0.11).ignoresSafeArea())
+        .background(Color.sheetBackground.ignoresSafeArea())
         .preferredColorScheme(.dark)
-        .presentationBackground(Color(white: 0.11))
+        .presentationBackground(Color.sheetBackground)
     }
 
     // MARK: - Top bar
@@ -82,8 +82,9 @@ struct SetReminderView: View {
                     .font(.headline)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
-                    .background(Color(white: 0.2), in: Circle())
             }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
 
             Spacer()
 
@@ -100,13 +101,13 @@ struct SetReminderView: View {
                     .font(.headline)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
-                    .background(Color.plantGreen, in: Circle())
-                    .opacity(canSave ? 1 : 0.4)
             }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.circle)
+            .tint(Color.plantGreen)
             .disabled(!canSave)
         }
     }
-
     // MARK: - Name field
     private var nameField: some View {
         HStack(spacing: 8) {
@@ -119,7 +120,7 @@ struct SetReminderView: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
-        .background(Color(white: 0.18), in: Capsule())
+        .glassEffect(.regular, in: .capsule)
     }
 
     // MARK: - Helpers
@@ -127,7 +128,7 @@ struct SetReminderView: View {
         VStack(spacing: 0, content: content)
             .padding(.horizontal, 16)
             .padding(.vertical, 6)
-            .background(Color(white: 0.18), in: RoundedRectangle(cornerRadius: 24))
+        .glassEffect(.regular, in: .rect(cornerRadius: 24))
     }
 
     private func pickerRow<T: Identifiable & Hashable & CaseIterable>(
