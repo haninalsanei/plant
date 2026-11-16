@@ -11,9 +11,18 @@ struct TodayRemindersView: View {
     @State private var editingPlant: Plant?
 
     private var statusText: String {
-        viewModel.completedCount == 0
-        ? "Your plants are waiting for a sip 💦"
-        : "\(viewModel.completedCount) of your plants feel loved today ✨"
+        let total = viewModel.todayPlants.count
+        let done = viewModel.completedCount
+
+        if done == 0 {
+            return total == 1
+                ? "Your plant is waiting for a sip 💦"
+                : "Your plants are waiting for a sip 💦"
+        }
+
+        return done == 1
+            ? "1 of your plants feels loved today ✨"
+            : "\(done) of your plants feel loved today ✨"
     }
 
     var body: some View {
@@ -70,15 +79,9 @@ struct TodayRemindersView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
 
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.2))
-                    Capsule()
-                        .fill(Color.progressGreen)                        .frame(width: geo.size.width * viewModel.progress)
-                }
-            }
-            .frame(height: 4)
-            .animation(.easeInOut, value: viewModel.progress)
+            ProgressView(value: viewModel.progress)
+                .tint(Color.progressGreen)
+                .animation(.easeInOut, value: viewModel.progress)
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
@@ -111,6 +114,7 @@ struct PlantRow: View {
                 .font(.title2)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(done ? "Mark \(plant.name) as not watered" : "Mark \(plant.name) as watered")
 
             // محتوى الصف (الضغط عليه يفتح التعديل)
             HStack {

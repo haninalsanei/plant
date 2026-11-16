@@ -5,7 +5,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
     private let center = UNUserNotificationCenter.current()
     private let reminderHour = 9
-    private let batchCount = 4
+    /// عدد التذكيرات القادمة لكل نبتة (iOS يسمح بـ 64 إشعار معلّق كحد أقصى)
+    private let batchCount = 5
 
     private override init() {
         super.init()
@@ -20,11 +21,21 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // MARK: - Permission
+    /// يطلب الصلاحية مرة وحدة فقط، وبعدها يرجع الحالة المحفوظة بدون ما يزعج المستخدم
     func requestPermission() async -> Bool {
-        (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        let settings = await center.notificationSettings()
+        switch settings.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .notDetermined:
+            return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+        default:
+            return false
+        }
     }
 
     // MARK: - Schedule
+    /// يجدول تذكيرات النبتة بناءً على آخر مرة انسقت، مو على وقت فتح التطبيق
     func schedule(_ plant: Plant) {
         Task {
             guard await requestPermission() else { return }
@@ -32,42 +43,39 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
             let cal = Calendar.current
             let body = "Time to water \(plant.name) 💧"
+            let start = firstReminderDate(for: plant, calendar: cal)
 
-            switch plant.wateringFrequency {
-            case .everyDay:
-                var comps = DateComponents()
-                comps.hour = reminderHour
-                await add(id: "\(plant.id.uuidString)-0",
+            for i in 0..<batchCount {
+                guard let date = cal.date(byAdding: .day,
+                                          value: i * plant.wateringFrequency.days,
+                                          to: start) else { continue }
+                let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+                await add(id: "\(plant.id.uuidString)-\(i)",
                           body: body,
-                          trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true))
-
-            case .weekly:
-                var comps = DateComponents()
-                comps.weekday = cal.component(.weekday, from: Date())
-                comps.hour = reminderHour
-                await add(id: "\(plant.id.uuidString)-0",
-                          body: body,
-                          trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: true))
-
-            default:
-                // كل ٢ أو ٣ أو ١٠ أو ١٤ يوم: نجدول عدة تذكيرات قادمة
-                let start = cal.nextDate(
-                    after: Date(),
-                    matching: DateComponents(hour: reminderHour),
-                    matchingPolicy: .nextTime
-                ) ?? Date()
-
-                for i in 0..<batchCount {
-                    guard let date = cal.date(byAdding: .day,
-                                              value: i * plant.wateringFrequency.days,
-                                              to: start) else { continue }
-                    let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: date)
-                    await add(id: "\(plant.id.uuidString)-\(i)",
-                              body: body,
-                              trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
-                }
+                          trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
             }
         }
+    }
+
+    /// أول موعد تذكير: يوم السقي القادم الساعة ٩.
+    /// لو النبتة ما انسقت أبداً أو موعدها فات، نذكّر في أقرب ساعة ٩ قادمة.
+    private func firstReminderDate(for plant: Plant, calendar cal: Calendar) -> Date {
+        let now = Date()
+        let nextReminderHour = cal.nextDate(
+            after: now,
+            matching: DateComponents(hour: reminderHour, minute: 0),
+            matchingPolicy: .nextTime
+        ) ?? now
+
+        guard let last = plant.lastWateredDate,
+              let dueDay = cal.date(byAdding: .day,
+                                    value: plant.wateringFrequency.days,
+                                    to: cal.startOfDay(for: last)),
+              let dueDate = cal.date(bySettingHour: reminderHour, minute: 0, second: 0, of: dueDay),
+              dueDate > now
+        else { return nextReminderHour }
+
+        return dueDate
     }
 
     func cancel(_ plant: Plant) {

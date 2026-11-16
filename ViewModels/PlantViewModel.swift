@@ -52,6 +52,8 @@ final class PlantViewModel {
         guard let index = plants.firstIndex(where: { $0.id == plant.id }) else { return }
         plants[index].lastWateredDate = plants[index].isDoneToday ? nil : Date()
         save()
+        // نعيد الجدولة عشان تبدأ الدورة من تاريخ السقي الجديد
+        NotificationManager.shared.schedule(plants[index])
     }
 
     // MARK: - Storage

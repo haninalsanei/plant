@@ -12,6 +12,7 @@ struct SetReminderView: View {
     @State private var light: LightRequirement
     @State private var frequency: WateringFrequency
     @State private var amount: WaterAmount
+    @State private var showDeleteAlert = false
 
     init(
         plant: Plant? = nil,
@@ -33,45 +34,62 @@ struct SetReminderView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                topBar
-                nameField
+        VStack(spacing: 0) {
+            topBar
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 8)
 
-                card {
+            Form {
+                Section {
+                    nameField
+                }
+
+                Section {
                     pickerRow("Room", icon: "location", selection: $room) { $0.displayName }
-                    Divider().overlay(Color.white.opacity(0.1))
                     pickerRow("Light", icon: "sun.max", selection: $light) { $0.displayName }
                 }
 
-                card {
+                Section {
                     pickerRow("Watering Days", icon: "drop", selection: $frequency) { $0.displayName }
-                    Divider().overlay(Color.white.opacity(0.1))
                     pickerRow("Water", icon: "drop", selection: $amount) { $0.displayName }
                 }
 
                 if onDelete != nil {
-                    Button {
-                        onDelete?()
-                        dismiss()
-                    } label: {
-                        Text("Delete Reminder")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.deleteRed)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 46)
-                            .glassEffect(.regular.interactive(), in: .capsule)
+                    Section {
+                        Button {
+                            showDeleteAlert = true
+                        } label: {
+                            Text("Delete Reminder")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.deleteRed)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 46)
+                                .glassEffect(.regular.interactive(), in: .capsule)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
                     }
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 20)
+            .scrollContentBackground(.hidden)
+            .environment(\.defaultMinListRowHeight, 36)
         }
         .scrollDismissesKeyboard(.interactively)
         .scrollBounceBehavior(.basedOnSize)
         .background(Color.sheetBackground.ignoresSafeArea())
+        .preferredColorScheme(.dark)
         .presentationBackground(Color.sheetBackground)
+        .alert("Delete Reminder", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                onDelete?()
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to delete this reminder?")
+        }
     }
 
     // MARK: - Top bar
@@ -107,7 +125,6 @@ struct SetReminderView: View {
             .buttonStyle(.glassProminent)
             .buttonBorderShape(.circle)
             .tint(Color.plantGreen)
-            .disabled(!canSave)
         }
     }
 
@@ -121,45 +138,41 @@ struct SetReminderView: View {
                 .tint(Color.plantGreenBorder)
                 .foregroundStyle(.white)
         }
-        .padding(.horizontal, 16)
-        .frame(height: 52)
-        .glassEffect(.regular, in: .capsule)
+        .listRowBackground(Capsule().fill(Color.cardBackground))
     }
 
     // MARK: - Helpers
-    private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        VStack(spacing: 0, content: content)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
-            .glassEffect(.regular, in: .rect(cornerRadius: 24))
-    }
-
     private func pickerRow<T: Identifiable & Hashable & CaseIterable>(
         _ title: String,
         icon: String,
         selection: Binding<T>,
         label: @escaping (T) -> String
     ) -> some View where T.AllCases: RandomAccessCollection {
-        HStack {
-            Label(title, systemImage: icon)
-                .foregroundStyle(.white)
-
-            Spacer()
-
-            Picker(title, selection: selection) {
-                ForEach(T.allCases) { option in
-                    Text(label(option)).tag(option)
-                }
+        Picker(selection: selection) {
+            ForEach(T.allCases) { option in
+                Text(label(option)).tag(option)
             }
-            .pickerStyle(.menu)
-            .labelsHidden()
-            .tint(.gray)
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                Text(title)
+            }
+            .foregroundStyle(.white)
         }
-        .frame(height: 44)
+        .pickerStyle(.menu)
+        .tint(.gray)
+        .font(.subheadline)
+        .frame(height: 40)
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+        .listRowBackground(Color.cardBackground)
+        // الفاصل يمتد بعرض الكرت كامل مثل السكتش
+        .alignmentGuide(.listRowSeparatorLeading) { _ in -16 }
     }
 
     // MARK: - Save
     private func save() {
+        // الزر يبقى أخضر مثل التصميم، بس ما يحفظ إذا الاسم فاضي
+        guard canSave else { return }
         var plant = existing ?? Plant(name: "")
         plant.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         plant.room = room
@@ -172,6 +185,10 @@ struct SetReminderView: View {
 }
 
 #Preview {
-    SetReminderView(plant: Plant(name: "Pothos"), onDelete: {})
-        .preferredColorScheme(.dark)
+    // نعرضها كـ sheet مثل ما تنفتح في التطبيق
+    Color.black
+        .ignoresSafeArea()
+        .sheet(isPresented: .constant(true)) {
+            SetReminderView()
+        }
 }
