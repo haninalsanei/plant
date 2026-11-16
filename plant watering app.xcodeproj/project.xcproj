@@ -37,10 +37,8 @@
         "resources",
       ],
       "build-settings": {
-        "ASSETCATALOG_COMPILER_APPICON_NAME[config=Debug]": "AppIcon",
-        "ASSETCATALOG_COMPILER_APPICON_NAME[config=Debug][sdk=iphoneos*]": "AppIcon",
-        "ASSETCATALOG_COMPILER_APPICON_NAME[config=Release]": "AppIcon",
-        "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "YES",
+        "ASSETCATALOG_COMPILER_APPICON_NAME": "Planto",
+        "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "NO",
         "CODE_SIGN_IDENTITY[config=Debug]": "Apple Development",
         "CODE_SIGN_IDENTITY[config=Debug][sdk=macosx*]": "Apple Development",
         "CODE_SIGN_STYLE[config=Debug]": "Automatic",
