@@ -42,4 +42,5 @@ struct AllDoneView: View {
 
 #Preview {
     AllDoneView(onAddTapped: {})
+        .preferredColorScheme(.dark)
 }

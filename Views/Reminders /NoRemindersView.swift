@@ -21,10 +21,10 @@ struct NoRemindersView: View {
                 .padding(.trailing, 24)
                 .padding(.bottom, 24)
         }
-        .preferredColorScheme(.dark)
     }
 }
 
 #Preview {
     NoRemindersView(onAddTapped: {})
+        .preferredColorScheme(.dark)
 }

@@ -60,7 +60,6 @@ struct TodayRemindersView: View {
                 onDelete: { viewModel.delete(plant) }
             )
         }
-        .preferredColorScheme(.dark)
     }
 
     // MARK: - Status + progress

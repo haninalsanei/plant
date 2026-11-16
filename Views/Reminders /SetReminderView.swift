@@ -29,46 +29,48 @@ struct SetReminderView: View {
     }
 
     private var canSave: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
-        VStack(spacing: 28) {
-            topBar
-            nameField
+        ScrollView {
+            VStack(spacing: 28) {
+                topBar
+                nameField
 
-            card {
-                pickerRow("Room", icon: "location", selection: $room) { $0.displayName }
-                Divider().overlay(Color.white.opacity(0.1))
-                pickerRow("Light", icon: "sun.max", selection: $light) { $0.displayName }
-            }
+                card {
+                    pickerRow("Room", icon: "location", selection: $room) { $0.displayName }
+                    Divider().overlay(Color.white.opacity(0.1))
+                    pickerRow("Light", icon: "sun.max", selection: $light) { $0.displayName }
+                }
 
-            card {
-                pickerRow("Watering Days", icon: "drop", selection: $frequency) { $0.displayName }
-                Divider().overlay(Color.white.opacity(0.1))
-                pickerRow("Water", icon: "drop", selection: $amount) { $0.displayName }
-            }
+                card {
+                    pickerRow("Watering Days", icon: "drop", selection: $frequency) { $0.displayName }
+                    Divider().overlay(Color.white.opacity(0.1))
+                    pickerRow("Water", icon: "drop", selection: $amount) { $0.displayName }
+                }
 
-            if onDelete != nil {
-                Button {
-                    onDelete?()
-                    dismiss()
-                } label: {
-                    Text("Delete Reminder")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.deleteRed)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 46)
-                        .glassEffect(.regular.interactive(), in: .capsule)
+                if onDelete != nil {
+                    Button {
+                        onDelete?()
+                        dismiss()
+                    } label: {
+                        Text("Delete Reminder")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.deleteRed)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 46)
+                            .glassEffect(.regular.interactive(), in: .capsule)
+                    }
                 }
             }
-
-            Spacer()
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 20)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
+        .scrollDismissesKeyboard(.interactively)
+        .scrollBounceBehavior(.basedOnSize)
         .background(Color.sheetBackground.ignoresSafeArea())
-        .preferredColorScheme(.dark)
         .presentationBackground(Color.sheetBackground)
     }
 
@@ -108,6 +110,7 @@ struct SetReminderView: View {
             .disabled(!canSave)
         }
     }
+
     // MARK: - Name field
     private var nameField: some View {
         HStack(spacing: 8) {
@@ -128,7 +131,7 @@ struct SetReminderView: View {
         VStack(spacing: 0, content: content)
             .padding(.horizontal, 16)
             .padding(.vertical, 6)
-        .glassEffect(.regular, in: .rect(cornerRadius: 24))
+            .glassEffect(.regular, in: .rect(cornerRadius: 24))
     }
 
     private func pickerRow<T: Identifiable & Hashable & CaseIterable>(
@@ -158,7 +161,7 @@ struct SetReminderView: View {
     // MARK: - Save
     private func save() {
         var plant = existing ?? Plant(name: "")
-        plant.name = name.trimmingCharacters(in: .whitespaces)
+        plant.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         plant.room = room
         plant.light = light
         plant.wateringFrequency = frequency
@@ -170,4 +173,5 @@ struct SetReminderView: View {
 
 #Preview {
     SetReminderView(plant: Plant(name: "Pothos"), onDelete: {})
+        .preferredColorScheme(.dark)
 }
