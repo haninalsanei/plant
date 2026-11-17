@@ -13,47 +13,22 @@
 - ✅ Mark plants as watered with a single tap
 - 🔔 Get reminders when it's time to water
 
-## Tech Stack
+##Technologies Used
 
-- **Language:** Swift
-- **UI:** SwiftUI
-- **Architecture:** MVVM (Model–View–ViewModel)
-- **IDE:** Xcode
+-Swift
+SwiftUI
+Liquid Glass
+MVVM architecture
+Xcode
 
-## Project Structure
 
-```
-plant/
-├── app/                          # App entry point
-├── models/                       # Data models (Plant, etc.)
-├── ViewModels/                   # Business logic & state
-├── Views/                        # SwiftUI screens and components
-├── Services/                     # Helpers (e.g. notifications, storage)
-├── Assets.xcassets/              # Colors, icons, and images
-└── plant watering app.xcodeproj  # Xcode project
-```
 
-## Getting Started
-
-### Requirements
-
-- macOS with **Xcode** installed
-- iOS Simulator or an iPhone
-
-### Run the App
-
-```bash
-git clone https://github.com/haninalsanei/plant.git
-cd plant
-open "plant watering app.xcodeproj"
-```
-
-Then select a simulator or your device in Xcode and press **Run** (⌘R).
 
 ## Screenshots
 
-<!-- Add screenshots of the app here, for example: -->
-<!-- <img src="screenshots/home.png" width="250"> -->
+<img width="428" height="926" alt="Pasted Graphic" src="https://github.com/user-attachments/assets/08b06563-bc74-4ca9-824b-fec609c18e29" /><img width="428" height="926" alt="Pasted Graphic 2" src="https://github.com/user-attachments/assets/0f119947-7ec5-40d5-bf08-ac7d76206f40" />
+<img width="428" height="926" alt="Pasted Graphic 1" src="https://github.com/user-attachments/assets/28fdc5b9-e5d4-4a3d-8337-aa2700977f78" />
+
 
 ## Author
 
