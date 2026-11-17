@@ -1,3 +1,4 @@
+
 <p align="center">
   <img src="icon.png" width="120" alt="Planto app icon">
 </p>
@@ -25,13 +26,12 @@ Xcode
 
 
 ## Screenshots
-
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/08b06563-bc74-4ca9-824b-fec609c18e29" width="200" alt="Start screen">
-  <img src="https://github.com/user-attachments/assets/0f119947-7ec5-40d5-bf08-ac7d76206f40" width="200" alt="All done screen">
-  <img src="https://github.com/user-attachments/assets/28fdc5b9-e5d4-4a3d-8337-aa2700977f78" width="200" alt="Set reminder screen">
+  <img src="https://github.com/user-attachments/assets/db7c06ba-1f36-45c3-9bd3-f203f378e09c" width="200" alt="Start screen">
+  <img src="https://github.com/user-attachments/assets/94259d43-f5a9-4bf4-98cb-f85cdb3b8455" width="200" alt="My plants screen">
+  <img src="https://github.com/user-attachments/assets/0b1446a6-e8c7-41b1-9af8-a4bc344e81d1" width="200" alt="All done screen">
+  <img src="https://github.com/user-attachments/assets/26105a23-03cf-48a7-b78a-3c2132221562" width="200" alt="Set reminder screen">
 </p>
-
 ## Author
 
 **Hanin Alsanei** – [@haninalsanei](https://github.com/haninalsanei)
