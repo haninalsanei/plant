@@ -26,9 +26,11 @@ Xcode
 
 ## Screenshots
 
-<img width="428" height="926" alt="Pasted Graphic" src="https://github.com/user-attachments/assets/08b06563-bc74-4ca9-824b-fec609c18e29" /><img width="428" height="926" alt="Pasted Graphic 2" src="https://github.com/user-attachments/assets/0f119947-7ec5-40d5-bf08-ac7d76206f40" />
-<img width="428" height="926" alt="Pasted Graphic 1" src="https://github.com/user-attachments/assets/28fdc5b9-e5d4-4a3d-8337-aa2700977f78" />
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/08b06563-bc74-4ca9-824b-fec609c18e29" width="200" alt="Start screen">
+  <img src="https://github.com/user-attachments/assets/0f119947-7ec5-40d5-bf08-ac7d76206f40" width="200" alt="All done screen">
+  <img src="https://github.com/user-attachments/assets/28fdc5b9-e5d4-4a3d-8337-aa2700977f78" width="200" alt="Set reminder screen">
+</p>
 
 ## Author
 
