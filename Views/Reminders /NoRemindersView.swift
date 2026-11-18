@@ -10,7 +10,7 @@ struct NoRemindersView: View {
             VStack(spacing: 0) {
                 PlantsHeader()
                 Spacer()
-                Text("No plants need watering today 🌿")
+                Text("No reminders set yet..")
                     .font(.subheadline)
                     .foregroundStyle(.gray)
                 Spacer()

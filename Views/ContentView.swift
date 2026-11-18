@@ -11,10 +11,8 @@ struct ContentView: View {
                 EmptyStateView { showAddSheet = true }          // أول استخدام
             } else if viewModel.plants.isEmpty {
                 NoRemindersSetView { showAddSheet = true }      // حذف كل النباتات
-            } else if viewModel.todayPlants.isEmpty {
-                NoRemindersView { showAddSheet = true }         // لا شيء موعده اليوم
             } else if viewModel.allDone {
-                AllDoneView { showAddSheet = true }
+                AllDoneView { showAddSheet = true }             // انسقت كلها أو ما فيه شي موعده اليوم
             } else {
                 TodayRemindersView(viewModel: viewModel) { showAddSheet = true }
             }

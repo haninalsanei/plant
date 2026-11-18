@@ -58,7 +58,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     /// أول موعد تذكير: يوم السقي القادم الساعة ٩.
-    /// لو النبتة ما انسقت أبداً أو موعدها فات، نذكّر في أقرب ساعة ٩ قادمة.
+    /// النبتة الجديدة تبدأ دورتها من يوم إضافتها.
+    /// لو موعدها فات (أو نبتة قديمة بدون تاريخ)، نذكّر في أقرب ساعة ٩ قادمة.
     private func firstReminderDate(for plant: Plant, calendar cal: Calendar) -> Date {
         let now = Date()
         let nextReminderHour = cal.nextDate(
@@ -67,7 +68,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             matchingPolicy: .nextTime
         ) ?? now
 
-        guard let last = plant.lastWateredDate,
+        guard let last = plant.cycleStartDate,
               let dueDay = cal.date(byAdding: .day,
                                     value: plant.wateringFrequency.days,
                                     to: cal.startOfDay(for: last)),

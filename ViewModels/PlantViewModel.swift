@@ -26,10 +26,10 @@ final class PlantViewModel {
         todayPlants.isEmpty ? 0 : Double(completedCount) / Double(todayPlants.count)
     }
 
-    /// True when every plant due today has been watered.
-    /// Plants whose next watering is on a later day don't block this.
+    /// True when you have plants and none of them still need water today.
+    /// Covers both: everything due today is watered, or nothing is due today at all.
     var allDone: Bool {
-        !todayPlants.isEmpty && todayPlants.allSatisfy { $0.isDoneToday }
+        !plants.isEmpty && todayPlants.allSatisfy { $0.isDoneToday }
     }
 
     // MARK: - Actions

@@ -110,6 +110,8 @@ struct Plant: Identifiable, Codable {
     var wateringFrequency: WateringFrequency = .everyDay
     var waterAmount: WaterAmount = .ml20to50
     var lastWateredDate: Date?
+    /// تاريخ إضافة النبتة. اختياري عشان النباتات المحفوظة من قبل تنقرأ بدون مشاكل
+    var createdDate: Date? = Date()
 }
 
 // MARK: - Today logic
@@ -119,13 +121,19 @@ extension Plant {
         return Calendar.current.isDateInToday(last)
     }
 
+    /// نحسب الدورة من آخر سقية، ولو ما انسقت أبداً من يوم إضافتها.
+    /// مثلاً نبتة "Every 3 days" جديدة أول موعد لها بعد ٣ أيام من الحفظ.
+    var cycleStartDate: Date? {
+        lastWateredDate ?? createdDate
+    }
+
     /// هل موعد سقيها اليوم (أو فات)؟
     var isDueToday: Bool {
-        guard let last = lastWateredDate else { return true }
+        guard let start = cycleStartDate else { return true }
         let cal = Calendar.current
         let days = cal.dateComponents(
             [.day],
-            from: cal.startOfDay(for: last),
+            from: cal.startOfDay(for: start),
             to: cal.startOfDay(for: Date())
         ).day ?? 0
         return days >= wateringFrequency.days
