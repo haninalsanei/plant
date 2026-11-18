@@ -13,6 +13,7 @@ struct SetReminderView: View {
     @State private var frequency: WateringFrequency
     @State private var amount: WaterAmount
     @State private var showDeleteAlert = false
+    @State private var showNameError = false
 
     init(
         plant: Plant? = nil,
@@ -43,6 +44,13 @@ struct SetReminderView: View {
             Form {
                 Section {
                     nameField
+                } footer: {
+                    // تظهر بس لما يضغط حفظ والاسم فاضي
+                    if showNameError {
+                        Text("Please enter a plant name")
+                            .font(.footnote)
+                            .foregroundStyle(Color.deleteRed)
+                    }
                 }
 
                 Section {
@@ -75,6 +83,10 @@ struct SetReminderView: View {
             }
             .scrollContentBackground(.hidden)
             .environment(\.defaultMinListRowHeight, 36)
+        }
+        .onChange(of: name) {
+            // نخفي الرسالة أول ما يكتب اسم
+            if canSave { showNameError = false }
         }
         .scrollDismissesKeyboard(.interactively)
         .scrollBounceBehavior(.basedOnSize)
@@ -177,7 +189,11 @@ struct SetReminderView: View {
     // MARK: - Save
     private func save() {
         // الزر يبقى أخضر مثل التصميم، بس ما يحفظ إذا الاسم فاضي
-        guard canSave else { return }
+        guard canSave else {
+            withAnimation { showNameError = true }
+            AccessibilityNotification.Announcement("Please enter a plant name").post()
+            return
+        }
         var plant = existing ?? Plant(name: "")
         plant.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         plant.room = room
