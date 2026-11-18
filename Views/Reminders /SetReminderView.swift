@@ -125,6 +125,9 @@ struct SetReminderView: View {
             .buttonStyle(.glassProminent)
             .buttonBorderShape(.circle)
             .tint(Color.plantGreen)
+            .accessibilityLabel("Save")
+            // ستايل glassProminent يضيف صفة Selected، نشيلها عشان VoiceOver ما يقول "Save, Selected"
+            .accessibilityRemoveTraits(.isSelected)
         }
     }
 
@@ -154,7 +157,9 @@ struct SetReminderView: View {
             }
         } label: {
             HStack(spacing: 6) {
+                // الأيقونة للزينة بس
                 Image(systemName: icon)
+                    .accessibilityHidden(true)
                 Text(title)
             }
             .foregroundStyle(.white)

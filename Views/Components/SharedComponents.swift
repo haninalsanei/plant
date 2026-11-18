@@ -24,11 +24,12 @@ struct PlantsHeader: View {
         VStack(spacing: 0) {
             HStack {
                 Text("My Plants 🌱")
-                    .font(.largeTitle.bold())
+                    .font(.largeTitle.weight(.semibold))
+                    .tracking(0.37)
 //                    .foregroundStyle(.white)
                 Spacer()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
             .padding(.vertical, 12)
 
             Divider().overlay(Color.white.opacity(0.15))

@@ -13,7 +13,9 @@ final class PlantViewModel {
 
     // MARK: - Today
     var todayPlants: [Plant] {
-        plants.filter { $0.isDueToday || $0.isDoneToday }
+        // غير المكتملة أولاً ثم المكتملة، مع الحفاظ على الترتيب الأصلي داخل كل مجموعة
+        let today = plants.filter { $0.isDueToday || $0.isDoneToday }
+        return today.filter { !$0.isDoneToday } + today.filter { $0.isDoneToday }
     }
 
     var completedCount: Int {

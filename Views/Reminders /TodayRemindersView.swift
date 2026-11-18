@@ -133,6 +133,10 @@ struct PlantRow: View {
                     }
                     .opacity(done ? 0.5 : 1)
                 }
+                // عنصر واحد لـ VoiceOver بدون أسماء الأيقونات
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(plant.name), in \(plant.room.displayName), \(plant.light.displayName), \(plant.waterAmount.displayName)")
+                .accessibilityAddTraits(.isButton)
                 Spacer()
             }
             .contentShape(Rectangle())
