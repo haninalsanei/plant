@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 // MARK: - Room
 enum Room: String, CaseIterable, Identifiable, Codable {
@@ -102,16 +103,72 @@ enum WaterAmount: String, CaseIterable, Identifiable, Codable {
 }
 
 // MARK: - Plant
-struct Plant: Identifiable, Codable {
-    var id = UUID()
-    var name: String
-    var room: Room = .bedroom
-    var light: LightRequirement = .fullSun
-    var wateringFrequency: WateringFrequency = .everyDay
-    var waterAmount: WaterAmount = .ml20to50
+/// نموذج SwiftData ويتزامن مع iCloud عن طريق CloudKit.
+/// شروط CloudKit: كل خاصية لها قيمة افتراضية (أو اختيارية)، وما نستخدم `@Attribute(.unique)`.
+/// نحفظ الـ enums كنص (rawValue) عشان التخزين يكون بسيط ويتحمل أي تغيير مستقبلي.
+@Model
+final class Plant {
+    var id: UUID = UUID()
+    var name: String = ""
+    var roomRaw: String = Room.bedroom.rawValue
+    var lightRaw: String = LightRequirement.fullSun.rawValue
+    var frequencyRaw: String = WateringFrequency.everyDay.rawValue
+    var amountRaw: String = WaterAmount.ml20to50.rawValue
     var lastWateredDate: Date?
-    /// تاريخ إضافة النبتة. اختياري عشان النباتات المحفوظة من قبل تنقرأ بدون مشاكل
-    var createdDate: Date? = Date()
+    /// نستخدمه للترتيب بس، عشان القائمة تحافظ على ترتيب الإضافة
+    var createdDate: Date = Date()
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        room: Room = .bedroom,
+        light: LightRequirement = .fullSun,
+        wateringFrequency: WateringFrequency = .everyDay,
+        waterAmount: WaterAmount = .ml20to50,
+        lastWateredDate: Date? = nil,
+        createdDate: Date = Date()
+    ) {
+        self.id = id
+        self.name = name
+        self.roomRaw = room.rawValue
+        self.lightRaw = light.rawValue
+        self.frequencyRaw = wateringFrequency.rawValue
+        self.amountRaw = waterAmount.rawValue
+        self.lastWateredDate = lastWateredDate
+        self.createdDate = createdDate
+    }
+
+    var room: Room {
+        get { Room(rawValue: roomRaw) ?? .bedroom }
+        set { roomRaw = newValue.rawValue }
+    }
+
+    var light: LightRequirement {
+        get { LightRequirement(rawValue: lightRaw) ?? .fullSun }
+        set { lightRaw = newValue.rawValue }
+    }
+
+    var wateringFrequency: WateringFrequency {
+        get { WateringFrequency(rawValue: frequencyRaw) ?? .everyDay }
+        set { frequencyRaw = newValue.rawValue }
+    }
+
+    var waterAmount: WaterAmount {
+        get { WaterAmount(rawValue: amountRaw) ?? .ml20to50 }
+        set { amountRaw = newValue.rawValue }
+    }
+}
+
+// MARK: - Legacy (UserDefaults)
+/// الشكل القديم اللي كان محفوظ في UserDefaults، نستخدمه مرة وحدة عشان ننقل البيانات لـ SwiftData
+struct LegacyPlant: Codable {
+    var id: UUID
+    var name: String
+    var room: Room
+    var light: LightRequirement
+    var wateringFrequency: WateringFrequency
+    var waterAmount: WaterAmount
+    var lastWateredDate: Date?
 }
 
 // MARK: - Today logic
@@ -121,15 +178,10 @@ extension Plant {
         return Calendar.current.isDateInToday(last)
     }
 
-    /// نحسب الدورة من آخر سقية، ولو ما انسقت أبداً من يوم إضافتها.
-    /// مثلاً نبتة "Every 3 days" جديدة أول موعد لها بعد ٣ أيام من الحفظ.
-    var cycleStartDate: Date? {
-        lastWateredDate ?? createdDate
-    }
-
     /// هل موعد سقيها اليوم (أو فات)؟
+    /// النبتة الجديدة اللي ما انسقت أبداً تطلع في قائمة اليوم على طول.
     var isDueToday: Bool {
-        guard let start = cycleStartDate else { return true }
+        guard let start = lastWateredDate else { return true }
         let cal = Calendar.current
         let days = cal.dateComponents(
             [.day],

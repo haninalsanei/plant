@@ -35,11 +35,12 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     // MARK: - Schedule
-    /// يجدول تذكيرات النبتة بناءً على آخر مرة انسقت، مو على وقت فتح التطبيق
-    func schedule(_ plant: Plant) {
+    /// يجدول تذكيرات النبتة بناءً على آخر مرة انسقت، مو على وقت فتح التطبيق.
+    /// ياخذ نسخة من بيانات النبتة (مو النبتة نفسها) عشان ما نلمس نموذج SwiftData ممكن ينحذف أثناء الانتظار.
+    func schedule(_ plant: ReminderKey) {
         Task {
             guard await requestPermission() else { return }
-            await removePending(for: plant)
+            await removePending(for: plant.id)
 
             let cal = Calendar.current
             let body = "Time to water \(plant.name) 💧"
@@ -47,7 +48,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
             for i in 0..<batchCount {
                 guard let date = cal.date(byAdding: .day,
-                                          value: i * plant.wateringFrequency.days,
+                                          value: i * plant.frequencyDays,
                                           to: start) else { continue }
                 let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: date)
                 await add(id: "\(plant.id.uuidString)-\(i)",
@@ -58,9 +59,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     /// أول موعد تذكير: يوم السقي القادم الساعة ٩.
-    /// النبتة الجديدة تبدأ دورتها من يوم إضافتها.
-    /// لو موعدها فات (أو نبتة قديمة بدون تاريخ)، نذكّر في أقرب ساعة ٩ قادمة.
-    private func firstReminderDate(for plant: Plant, calendar cal: Calendar) -> Date {
+    /// لو النبتة ما انسقت أبداً أو موعدها فات، نذكّر في أقرب ساعة ٩ قادمة.
+    private func firstReminderDate(for plant: ReminderKey, calendar cal: Calendar) -> Date {
         let now = Date()
         let nextReminderHour = cal.nextDate(
             after: now,
@@ -68,9 +68,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             matchingPolicy: .nextTime
         ) ?? now
 
-        guard let last = plant.cycleStartDate,
+        guard let last = plant.lastWateredDate,
               let dueDay = cal.date(byAdding: .day,
-                                    value: plant.wateringFrequency.days,
+                                    value: plant.frequencyDays,
                                     to: cal.startOfDay(for: last)),
               let dueDate = cal.date(bySettingHour: reminderHour, minute: 0, second: 0, of: dueDay),
               dueDate > now
@@ -79,12 +79,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         return dueDate
     }
 
-    func cancel(_ plant: Plant) {
-        Task { await removePending(for: plant) }
-    }
-
-    func rescheduleAll(_ plants: [Plant]) {
-        plants.forEach { schedule($0) }
+    func cancel(_ plantID: UUID) {
+        Task { await removePending(for: plantID) }
     }
 
     // MARK: - Helpers
@@ -98,9 +94,9 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         try? await center.add(request)
     }
 
-    private func removePending(for plant: Plant) async {
+    private func removePending(for plantID: UUID) async {
         let pending = await center.pendingNotificationRequests()
-        let ids = pending.map(\.identifier).filter { $0.hasPrefix(plant.id.uuidString) }
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix(plantID.uuidString) }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
@@ -115,4 +111,20 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
     #endif
+}
+
+// MARK: - Reminder snapshot
+/// البيانات اللي تحتاجها التذكيرات بس. لو تغيّر أي شي منها نعيد جدولة النبتة.
+struct ReminderKey: Equatable, Sendable {
+    let id: UUID
+    let name: String
+    let frequencyDays: Int
+    let lastWateredDate: Date?
+
+    init(_ plant: Plant) {
+        id = plant.id
+        name = plant.name
+        frequencyDays = plant.wateringFrequency.days
+        lastWateredDate = plant.lastWateredDate
+    }
 }

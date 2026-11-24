@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel = PlantViewModel()
+    var viewModel: PlantViewModel
     @State private var showAddSheet = false
     @AppStorage("hasOnboarded") private var hasOnboarded = false
 
@@ -31,6 +31,9 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(viewModel: .preview(plants: [
+        Plant(name: "Pothos", room: .livingRoom),
+        Plant(name: "Monstera", room: .bedroom, light: .partialSun, waterAmount: .ml100to200)
+    ]))
         .preferredColorScheme(.dark)
 }

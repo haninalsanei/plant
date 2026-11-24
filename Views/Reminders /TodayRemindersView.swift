@@ -66,7 +66,11 @@ struct TodayRemindersView: View {
             SetReminderView(
                 plant: plant,
                 onSave: { viewModel.update($0) },
-                onDelete: { viewModel.delete(plant) }
+                onDelete: {
+                    // نقفل الشيت قبل الحذف عشان ما يقرأ نبتة محذوفة
+                    editingPlant = nil
+                    viewModel.delete(plant)
+                }
             )
         }
     }

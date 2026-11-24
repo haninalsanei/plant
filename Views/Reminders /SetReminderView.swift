@@ -194,7 +194,8 @@ struct SetReminderView: View {
             AccessibilityNotification.Announcement("Please enter a plant name").post()
             return
         }
-        var plant = existing ?? Plant(name: "")
+        // Plant صار class (SwiftData)، فالتعديل يطبّق على نفس النبتة المحفوظة
+        let plant = existing ?? Plant(name: "")
         plant.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         plant.room = room
         plant.light = light

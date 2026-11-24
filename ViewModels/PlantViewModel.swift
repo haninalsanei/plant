@@ -1,14 +1,26 @@
 import SwiftUI
+import SwiftData
+import CoreData
 import Observation
 
 @Observable
 final class PlantViewModel {
     private(set) var plants: [Plant] = []
-    private let storageKey = "savedPlants"
 
-    init() {
-        load()
-        NotificationManager.shared.rescheduleAll(plants)
+    @ObservationIgnored private let container: ModelContainer
+    @ObservationIgnored private var context: ModelContext { container.mainContext }
+    @ObservationIgnored private var remoteChangeTask: Task<Void, Never>?
+    /// آخر نسخة جدولنا لها تذكيرات، عشان ما نعيد الجدولة إلا للنباتات اللي تغيّرت فعلاً
+    @ObservationIgnored private var scheduled: [UUID: ReminderKey] = [:]
+
+    private let legacyStorageKey = "savedPlants"
+
+    init(container: ModelContainer) {
+        self.container = container
+        migrateFromUserDefaults()
+        fetch()
+        syncNotifications(force: true)
+        observeRemoteChanges()
     }
 
     // MARK: - Today
@@ -34,42 +46,109 @@ final class PlantViewModel {
 
     // MARK: - Actions
     func add(_ plant: Plant) {
-        plants.append(plant)
-        save()
-        NotificationManager.shared.schedule(plant)
+        context.insert(plant)
+        saveAndRefresh()
     }
 
+    /// النبتة نفسها تعدّلت في شاشة التعديل، هنا نحفظ ونحدّث التذكيرات بس
     func update(_ plant: Plant) {
-        guard let index = plants.firstIndex(where: { $0.id == plant.id }) else { return }
-        plants[index] = plant
-        save()
-        NotificationManager.shared.schedule(plant)
+        saveAndRefresh()
     }
 
     func delete(_ plant: Plant) {
-        plants.removeAll { $0.id == plant.id }
-        save()
-        NotificationManager.shared.cancel(plant)
+        context.delete(plant)
+        saveAndRefresh()
     }
 
     func toggleWatered(_ plant: Plant) {
-        guard let index = plants.firstIndex(where: { $0.id == plant.id }) else { return }
-        plants[index].lastWateredDate = plants[index].isDoneToday ? nil : Date()
-        save()
+        plant.lastWateredDate = plant.isDoneToday ? nil : Date()
         // نعيد الجدولة عشان تبدأ الدورة من تاريخ السقي الجديد
-        NotificationManager.shared.schedule(plants[index])
+        saveAndRefresh()
     }
 
     // MARK: - Storage
-    private func save() {
-        if let data = try? JSONEncoder().encode(plants) {
-            UserDefaults.standard.set(data, forKey: storageKey)
+    private func saveAndRefresh() {
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save plants: \(error)")
+        }
+        fetch()
+        syncNotifications()
+    }
+
+    private func fetch() {
+        let descriptor = FetchDescriptor<Plant>(sortBy: [SortDescriptor(\.createdDate)])
+        plants = (try? context.fetch(descriptor)) ?? []
+    }
+
+    /// لما تجي تغييرات من iCloud (من جهاز ثاني مثلاً) نحدّث القائمة والتذكيرات
+    private func observeRemoteChanges() {
+        remoteChangeTask = Task { [weak self] in
+            let changes = NotificationCenter.default.notifications(named: .NSPersistentStoreRemoteChange)
+            for await _ in changes {
+                guard let self else { return }
+                self.fetch()
+                self.syncNotifications()
+            }
         }
     }
 
-    private func load() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
-              let saved = try? JSONDecoder().decode([Plant].self, from: data) else { return }
-        plants = saved
+    // MARK: - Notifications
+    /// يجدول التذكيرات للنباتات الجديدة أو اللي تغيّر موعدها، ويلغي تذكيرات النباتات المحذوفة
+    private func syncNotifications(force: Bool = false) {
+        let current = Dictionary(plants.map { ($0.id, ReminderKey($0)) }, uniquingKeysWith: { first, _ in first })
+
+        for (id, key) in current where force || scheduled[id] != key {
+            NotificationManager.shared.schedule(key)
+        }
+        for id in scheduled.keys where current[id] == nil {
+            NotificationManager.shared.cancel(id)
+        }
+        scheduled = current
+    }
+
+    // MARK: - Migration
+    /// ننقل النباتات المحفوظة في UserDefaults (النسخة القديمة) إلى SwiftData مرة وحدة
+    private func migrateFromUserDefaults() {
+        let defaults = UserDefaults.standard
+        guard let data = defaults.data(forKey: legacyStorageKey) else { return }
+        guard let legacy = try? JSONDecoder().decode([LegacyPlant].self, from: data) else {
+            print("Could not read old plants, leaving them in UserDefaults")
+            return
+        }
+
+        // نعطي كل نبتة تاريخ إضافة متسلسل عشان يبقى نفس الترتيب القديم
+        let base = Date()
+        for (index, old) in legacy.enumerated() {
+            context.insert(Plant(
+                id: old.id,
+                name: old.name,
+                room: old.room,
+                light: old.light,
+                wateringFrequency: old.wateringFrequency,
+                waterAmount: old.waterAmount,
+                lastWateredDate: old.lastWateredDate,
+                createdDate: base.addingTimeInterval(Double(index))
+            ))
+        }
+
+        do {
+            try context.save()
+            defaults.removeObject(forKey: legacyStorageKey)
+        } catch {
+            print("Failed to migrate plants: \(error)")
+        }
     }
 }
+
+// MARK: - Previews
+#if DEBUG
+extension PlantViewModel {
+    static func preview(plants: [Plant] = []) -> PlantViewModel {
+        let container = PlantStore.makePreviewContainer()
+        plants.forEach { container.mainContext.insert($0) }
+        return PlantViewModel(container: container)
+    }
+}
+#endif
